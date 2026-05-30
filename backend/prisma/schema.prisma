@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model WorkType {
+  id        Int            @id @default(autoincrement())
+  name      String         @unique
+  createdAt DateTime       @default(now()) @map("created_at")
+  entries   JournalEntry[]
+
+  @@map("work_types")
+}
+
+model JournalEntry {
+  id           Int      @id @default(autoincrement())
+  workDate     DateTime @map("work_date")
+  workTypeId   Int      @map("work_type_id")
+  volume       Decimal  @db.Decimal(10, 2)
+  unit         String
+  executorName String   @map("executor_name")
+  comment      String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  workType WorkType @relation(fields: [workTypeId], references: [id], onDelete: Restrict)
+
+  @@index([workDate])
+  @@map("journal_entries")
+}
